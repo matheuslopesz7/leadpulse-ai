@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          channel: string
+          created_at: string
+          customer_name: string
+          id: string
+          incoming_message: string
+          intent_category: string
+          lead_temperature: string
+          recommended_action: string
+          sentiment: string
+          status: string
+          suggested_reply: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          customer_name: string
+          id?: string
+          incoming_message: string
+          intent_category: string
+          lead_temperature: string
+          recommended_action: string
+          sentiment: string
+          status?: string
+          suggested_reply: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          incoming_message?: string
+          intent_category?: string
+          lead_temperature?: string
+          recommended_action?: string
+          sentiment?: string
+          status?: string
+          suggested_reply?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
