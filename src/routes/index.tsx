@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Zap, Activity, Users, Flame, Timer, Clock, HelpCircle, X, Loader2, Search, MessageCircle,
-  Instagram, Mail, Globe, Copy, Trash2, Bot, Target, Inbox, ChevronDown, Smile, Meh, AlertTriangle, Database,
+  Camera, Mail, Globe, Copy, Trash2, Bot, Target, Inbox, ChevronDown, Smile, Meh, AlertTriangle, Database,
 } from "lucide-react";
 import { LeadsProvider, useLeads } from "@/lib/leads-context";
 import { analyzeMessage, CHANNELS, STATUSES, TEMPERATURES, timeAgo, type Channel, type Lead, type Temperature } from "@/lib/leads";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   ),
 });
 
-const channelIcon: Record<Channel, typeof Mail> = { WhatsApp: MessageCircle, Instagram, Email: Mail, "Formulário Web": Globe };
+const channelIcon: Record<Channel, typeof Mail> = { WhatsApp: MessageCircle, Instagram: Camera, Email: Mail, "Formulário Web": Globe };
 const tempStyle: Record<Temperature, string> = {
   Quente: "bg-hot/15 text-hot border-hot/40 glow-hot",
   Morno: "bg-warm/15 text-warm border-warm/40",
@@ -110,7 +110,7 @@ function Console() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !msg.trim()) return toast.error("Preencha o nome e a mensagem do cliente.");
+    if (!name.trim() || !msg.trim()) { toast.error("Preencha o nome e a mensagem do cliente."); return; }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1200));
     const result = analyzeMessage(name, channel, msg);
