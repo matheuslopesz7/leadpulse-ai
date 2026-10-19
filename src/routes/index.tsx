@@ -6,7 +6,8 @@ import {
   Camera, Mail, Globe, Copy, Trash2, Bot, Target, Inbox, ChevronDown, Smile, Meh, AlertTriangle, Database,
 } from "lucide-react";
 import { LeadsProvider, useLeads } from "@/lib/leads-context";
-import { analyzeMessage, CHANNELS, STATUSES, TEMPERATURES, timeAgo, type Channel, type Lead, type Temperature } from "@/lib/leads";
+import { CHANNELS, STATUSES, TEMPERATURES, timeAgo, type Channel, type Lead, type Temperature } from "@/lib/leads";
+import { triageLead } from "@/lib/ai-triage.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -72,7 +73,7 @@ function Header({ onFaq }: { onFaq: () => void }) {
         </div>
         <div className="flex items-center gap-2">
           <span className="hidden items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground sm:flex">
-            <Database className="size-3.5" /> {connected ? "Supabase conectado" : "Modo simulação"}
+            <Database className="size-3.5" /> {connected ? "Banco conectado" : "Conectando..."}
           </span>
           <span className="flex items-center gap-2 rounded-full border border-hot/30 bg-hot/10 px-3 py-1.5 text-xs font-medium text-hot">
             <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-hot opacity-75" /><span className="relative size-2 rounded-full bg-hot" /></span>
@@ -112,13 +113,19 @@ function Console() {
     e.preventDefault();
     if (!name.trim() || !msg.trim()) { toast.error("Preencha o nome e a mensagem do cliente."); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    const result = analyzeMessage(name, channel, msg);
-    await addLead(result);
-    setLoading(false);
-    setMsg("");
-    setName("");
-    toast.success(`Lead classificado: ${result.lead_temperature} · ${result.intent_category}`);
+    try {
+      const r = await triageLead({ data: { name: name.trim(), channel, message: msg.trim() } });
+      if (!r.ok) { toast.error(r.error); return; }
+      const result = { customer_name: name.trim(), channel, incoming_message: msg.trim(), ...r.result } as Omit<Lead, "id" | "created_at" | "status">;
+      await addLead(result);
+      setMsg("");
+      setName("");
+      toast.success(`Lead classificado: ${result.lead_temperature} · ${result.intent_category}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao analisar o lead.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
